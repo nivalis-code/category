@@ -44,7 +44,7 @@ func Error[T any](err error) Result[T] {
 	return result[T]{zero, err}
 }
 
-// Lift lifts a function to the Result category. The lifted function returns an Error for an Error argument, and an
+// Lift lifts a function to the Result applicative functor. The lifted function returns an Error for an Error argument, and an
 // Ok-valued Result containing the result of applying the base function to the inner value of an Ok-valued argument.
 func Lift[T any, R any](f func(T) R) func(Result[T]) Result[R] {
 	return func(x Result[T]) Result[R] {
@@ -57,7 +57,7 @@ func Lift[T any, R any](f func(T) R) func(Result[T]) Result[R] {
 	}
 }
 
-// Lift2 lifts a binary function to the Result category. The lifted function returns an Error if either argument is
+// Lift2 lifts a binary function to the Result applicative functor. The lifted function returns an Error if either argument is
 // Error-valued, and an Ok-valued Result containing the result of applying the base function to the inner values of
 // two Ok-valued arguments.
 func Lift2[A any, B any, C any](f func(A, B) C) func(Result[A], Result[B]) Result[C] {
@@ -97,4 +97,11 @@ func Wrap[T any](value T, err error) Result[T] {
 	}
 
 	return Ok(value)
+}
+
+// Kliesli is Kliesli composition of two functions for the Result monad
+func Kliesli[A any, B any, C any](f func(A) Result[B], g func(B) Result[C]) func(A) Result[C] {
+	return func(x A) Result[C] {
+		return Bind(g)(f(x))
+	}
 }

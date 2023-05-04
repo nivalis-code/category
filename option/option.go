@@ -102,3 +102,10 @@ func Wrap[T any](value T, err error) Option[T] {
 
 	return Some(value)
 }
+
+// Kliesli is Kliesli composition of two functions for the Option monad
+func Kliesli[A any, B any, C any](f func(A) Option[B], g func(B) Option[C]) func(A) Option[C] {
+	return func(x A) Option[C] {
+		return Bind(g)(f(x))
+	}
+}

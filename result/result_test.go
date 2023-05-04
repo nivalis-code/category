@@ -115,3 +115,26 @@ func TestWrap(t *testing.T) {
 	assert.Equal(t, Ok(1/4.0), Wrap(testFunction(4)))
 	assert.Equal(t, Error[float64](errors.New("divide by zero")), Wrap(testFunction(0)))
 }
+
+func TestKliesli(t *testing.T) {
+	testFunction1 := func(s string) Result[int] {
+		if s == "fnord" {
+			return Error[int](errors.New("forbidden string"))
+		}
+		
+		return Ok(len(s))
+	}
+	testFunction2 := func(x int) Result[float64] {
+		if x == 0 {
+			return Error[float64](errors.New("divide by zero"))
+		}
+
+		return Ok(1/float64(x))
+	}
+
+	composition := Kliesli(testFunction1, testFunction2)
+
+	assert.Equal(t, Ok(1/4.0), composition("test"))
+	assert.True(t, composition("fnord").IsError())
+	assert.True(t, composition("").IsError())
+}

@@ -115,3 +115,26 @@ func TestWrap(t *testing.T) {
 	assert.Equal(t, Some(1/4.0), Wrap(testFunction(4)))
 	assert.Equal(t, Nothing[float64](), Wrap(testFunction(0)))
 }
+
+func TestKliesli(t *testing.T) {
+	testFunction1 := func(s string) Option[int] {
+		if s == "fnord" {
+			return Nothing[int]()
+		}
+		
+		return Some(len(s))
+	}
+	testFunction2 := func(x int) Option[float64] {
+		if x == 0 {
+			return Nothing[float64]()
+		}
+
+		return Some(1/float64(x))
+	}
+
+	composition := Kliesli(testFunction1, testFunction2)
+
+	assert.Equal(t, Some(1/4.0), composition("test"))
+	assert.True(t, composition("fnord").IsNothing())
+	assert.True(t, composition("").IsNothing())
+}
